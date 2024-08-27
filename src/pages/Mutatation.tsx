@@ -1,75 +1,77 @@
-import React,{useState} from 'react'
-import { useMutation, useQuery,  useQueryClient } from '@tanstack/react-query'
-import "./../App.css"
+import React, { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import "./../App.css";
 
-const fetchTasks = async () =>{
-    const res = await fetch("http://localhost:4000/tasks")
-    if (!res.ok) throw new Error("Something went wrong")
-     return res.json() 
-}
+const fetchTasks = async () => {
+  const res = await fetch("http://localhost:4000/tasks");
+  if (!res.ok) throw new Error("Something went wrong");
+  return res.json();
+};
 
 function MutationFunc() {
+  const queryClient = useQueryClient();
 
-    const queryClient = useQueryClient();
+  const [nextCondition, setNextCondition] = useState(false);
+  const [pagination, setPagination] = useState(2);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
 
-    const [title,setTitle] = useState('');
-    const [description,setDescription] = useState('');
-    
-    const {data,isPending,isError} = useQuery({
-        queryFn:()=>fetchTasks(),
-        queryKey: ['tasks']
-   
-    })
+  const { data, isPending, isError } = useQuery({
+    queryFn: () => fetchTasks(),
+    queryKey: ['tasks', nextCondition,pagination],
+  });
 
-    console.log(data)
-    const handleDelete = async (id:any) => {
-        const res = await fetch(`http://localhost:4000/deletetask/${id}`)
+  console.log(data);
 
-        queryClient.invalidateQueries({queryKey: ['tasks']});
+  const handleDelete = async (id: any) => {
+    const res = await fetch(`http://localhost:4000/deletetask/${id}`);
 
-        if (!res.ok) {
-         throw new Error('Chyba při odeslaní zprávy');
-       }    }
+    queryClient.invalidateQueries({ queryKey: ['tasks'] });
 
-    const handleAdd = async  ({title,description,id,isComplete}:any) => {
-
-     
-        const data = {
-            title,description}
-
-            
-     
-            const res = await fetch('http://localhost:4000/addtask', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-
-         
-        return res.json()
+    if (!res.ok) {
+      throw new Error('Chyba při odeslaní zprávy');
     }
+  };
 
+  const handleAdd = async ({ title, description }: any) => {
+    const data = { title, description };
 
-    const addMutation = useMutation({
-        mutationFn:handleAdd,
-        onMutate:async (newTask) => {
-               await queryClient.invalidateQueries({queryKey:['tasks']})
-               const previousTasks = queryClient.getQueryData(['tasks'])
-               queryClient.setQueryData(['tasks'],(old:any)=>{
-                return { tasks:[...old.tasks,newTask]}
-               })
-               return {previousTasks}
-            },
-        onError: (err,newTask,context) => {
-            queryClient.setQueryData(['tasks'],context?.previousTasks)
-        }    ,
-        onSettled: () => {
-        queryClient.invalidateQueries({queryKey:['tasks']})
+    const res = await fetch('http://localhost:4000/addtask', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
 
-        }   
-        })
-    
+    return res.json();
+  };
 
+  const addMutation = useMutation({
+    mutationFn: handleAdd,
+    onMutate: async (newTask) => {
+      await queryClient.cancelQueries({ queryKey: ['tasks'] });
+
+      // Get the previous data
+      const previousTasks = queryClient.getQueryData(['tasks']);
+
+      // Optimistically update the cache
+      queryClient.setQueryData(['tasks', nextCondition,pagination], (old: any) => {
+        return {
+          tasks: [...(old?.tasks || []), newTask],
+        };
+      });
+
+      // Return a context object with the previous data for potential rollback
+      return { previousTasks };
+    },
+    onError: (err, newTask, context) => {
+      // Rollback the cache to the previous data
+      queryClient.setQueryData(['tasks'], context?.previousTasks);
+    },
+    onSettled: () => {
+      // Invalidate the query to ensure the server state is in sync
+      queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    },
+  });
 
   return (
     <div>Optimistic updates
@@ -127,7 +129,8 @@ const fetchTasks = async () => {
 
 function MutationFunc() {
   const queryClient = useQueryClient();
-
+  const [nextCondition, setNextCondition] = useState(false);
+  const [pagination, setPagination] = useState(2);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
 
@@ -166,17 +169,27 @@ function MutationFunc() {
   const addMutation = useMutation({
     mutationFn: handleAdd,
     onMutate: async (newTask) => {
-      await queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      await queryClient.cancelQueries({ queryKey: ['tasks'] });
+
+      // Get the previous data
       const previousTasks = queryClient.getQueryData(['tasks']);
-      queryClient.setQueryData(['tasks'], (old: any) => {
-        return { tasks: [...old.tasks, newTask] };
+
+      // Optimistically update the cache
+      queryClient.setQueryData(['tasks', nextCondition,pagination], (old: any) => {
+        return {
+          tasks: [...(old?.tasks || []), newTask],
+        };
       });
+
+      // Return a context object with the previous data for potential rollback
       return { previousTasks };
     },
     onError: (err, newTask, context) => {
+      // Rollback the cache to the previous data
       queryClient.setQueryData(['tasks'], context?.previousTasks);
     },
     onSettled: () => {
+      // Invalidate the query to ensure the server state is in sync
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
     },
   });
