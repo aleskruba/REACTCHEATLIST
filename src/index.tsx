@@ -7,6 +7,7 @@ import {
   QueryClient,
   QueryClientProvider,
 } from '@tanstack/react-query'
+import { StateProvider } from './context/StateContext';
 
 const queryClient = new QueryClient()
 
@@ -16,7 +17,9 @@ const root = ReactDOM.createRoot(
 root.render(
   <QueryClientProvider client={queryClient}>
      <BrowserRouter >
+     <StateProvider>
         <App />
+        </StateProvider>
     </BrowserRouter>
   </QueryClientProvider>
 

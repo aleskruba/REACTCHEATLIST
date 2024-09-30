@@ -17,6 +17,13 @@ import ReactQueryDetail from "./pages/ReactQueryDetail";
 import ReactQueryInfinite from "./pages/ReactQueryInfinite";
 import Observer from "./pages/Observer";
 import MutationFunc from "./pages/Mutatation";
+import Fetch from "./pages/Fetch";
+import CheckBox from "./pages/CheckBox";
+import UseEffectTest from "./pages/UseEffectTest";
+import Throttle from "./pages/UseEffectTest";
+import Paginate from "./pages/UseEffectTest";
+import ThrottleTest from "./pages/ThrottleTest";
+
 
 
 
@@ -60,11 +67,13 @@ function App() {
  
         <Route path="/" element={<Layout />} >
             <Route index element={<Home />}/> 
+            <Route path="/fetch" element={<Fetch/>}/> 
             <Route path="/create" element={<Create />}/> 
             <Route path="/update" element={<Update />}/> 
             <Route path="/delete" element={<Delete />}/> 
             <Route path="/userform" element={<UserForm />}/> 
             <Route path="/filteradjust" element={<FilterAdjust />}/> 
+            <Route path="/throttle" element={<ThrottleTest />}/> 
             <Route path="/debounce" element={<Debounce />}/> 
             <Route path="/useref" element={<UseRef />}/> 
             <Route path="/usememo" element={<UseMemo />}/> 
@@ -74,7 +83,11 @@ function App() {
             <Route path="/loadmore" element={<ReactQueryInfinite />}/> 
             <Route path="/observer" element={<Observer />}/> 
             <Route path="/mutation" element={<MutationFunc />}/> 
-         
+
+            <Route path="/paginate" element={<Paginate />}/> 
+            <Route path="/checkbox" element={<CheckBox />}/> 
+
+       
         </Route>
       </Routes>
       </UserProvider>

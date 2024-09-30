@@ -77,3 +77,56 @@ export interface Name {
     nat: string;
   }
   
+
+  export interface Address {
+    street: string;
+    city: string;
+    postalCode: string;
+    country: string;
+  }
+  
+  export interface PriceDetails {
+    default: {
+      pricePerNight: number;
+      currency: string;
+    };
+    seasonalRates: {
+      startDate: string; // Use ISO date format
+      endDate: string;   // Use ISO date format
+      pricePerNight: number;
+    }[];
+    weekendRates: {
+      pricePerNight: number;
+    };
+  }
+  
+  export interface Facilities {
+    swimmingPool: boolean;
+    fitnessCenter: boolean;
+    restaurant: boolean;
+    bar: boolean;
+    spa: boolean;
+    businessCenter: boolean;
+    laundryService: boolean;
+    roomService: boolean;
+  }
+  
+  export interface Hotel {
+    hotelName: string;
+    address: Address;
+    rating: number;
+    priceDetails: PriceDetails;
+    breakfastIncluded: boolean;
+    airConditioning: boolean;
+    freeWiFi: boolean;
+    parkingAvailable: boolean;
+    petFriendly: boolean;
+    numberOfRooms: number;
+    checkInTime: string; // Use 24-hour format or any desired format
+    checkOutTime: string; // Use 24-hour format or any desired format
+    cancellationPolicy: string;
+    facilities: Facilities;
+    hotelDescription: string;
+    bookingLink: string;
+  }
+  
